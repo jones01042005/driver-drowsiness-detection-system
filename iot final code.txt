@@ -1,0 +1,44 @@
+const int blinkPin = 2;     
+const int motorPin =  11;      
+const int buzzerPin =  12;
+
+unsigned long lastBlinkTime = 3000;
+const unsigned long blinkTimeout = 1000; // 3 seconds in milliseconds
+
+void setup() {
+  pinMode(motorPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  pinMode(blinkPin, INPUT_PULLUP); // Using INPUT_PULLUP to enable internal pull-up resistor
+  digitalWrite(motorPin, HIGH);
+}
+
+void loop() {
+  if (detectBlink()) {
+    handleClosedEye();
+  } else {
+    handleOpenEye();
+  }
+}
+
+bool detectBlink() {
+  return digitalRead(blinkPin) == LOW;
+}
+
+void handleClosedEye() {
+  lastBlinkTime = millis(); // Record the time of the blink
+  digitalWrite(buzzerPin, HIGH); // Turn on buzzer when eye is closed
+  digitalWrite(motorPin, HIGH); // Turn off motor when eye is closed
+  while (detectBlink()) {} // Wait until the blink stops
+  digitalWrite(buzzerPin, LOW);
+}
+
+void handleOpenEye() {
+  unsigned long elapsedTime = millis() - lastBlinkTime;
+  
+  if (elapsedTime >= blinkTimeout) {
+    digitalWrite(buzzerPin, LOW); // Turn off buzzer if no blink for 2 seconds
+  }
+  
+  digitalWrite(motorPin, LOW); // Turn on motor when eye is open
+}  
+}
